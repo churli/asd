@@ -1,0 +1,74 @@
+* Elements that make up proteins
+** Amminoacidic elements:
+   H
+   (D) (Deuterium)
+   N
+   C
+   O
+** Post-translational adds:
+   S
+   Se
+   ???
+* Algorithmic considerations
+** Blocks-layout
+   1) Build the 2 graphs (atoms-bindings)
+   1.b) Take only the connected-component of the 1st atom of a protein
+   2) Cleverly build a product vertex-set (PVS)
+   3) On PVS compute the modular-product graph (MPG)
+   4) Search for the max clique in MPG
+   5) Return cardinality of MPG
+*** Remarks on blocks-layout
+    Steps 4-5 are part of a Bron-Kerbosch recursive max-clique-finding algorithm.
+    We sould use both the pivoting and vertex-ordering techniques.
+    We should also return cardinality of the current max clique in MPG at each recursion-backtrack step.
+* Data structures
+  Objects to be represented are:
+  a) Graphs for the 2 proteins
+  b) Elements of the "clever" PVS
+  c) MPG, i.e. a graph on PVS
+  d) Various sets of nodes to be used in Bron-Kerbosch algorithm
+** Graphs for the 2 proteins
+   Adjacency list method, i.e a list of objects like:
+
+   struct Atom {
+     char element; //facciamo un enum di fatto (potremmo anche usare un bit-field per ridurre lo spazio)
+     int serial; //forse utile per fare matching con le strutture HELIX/SHEET
+     int x; //position in x axis (int because we represent in mA° (milli Angstrom))
+     int y;
+     int z;
+     
+     struct AdjElem* adj;
+   }
+
+   where AdjElem is defined as:
+
+   struct AdjElem {
+     struct Atom* atom;
+     struct AdjElem* next;
+   }
+
+   struct Graph {
+     struct Atom* first;
+     }
+   
+** Elements of the "clever" PVS
+   Since it should be quite sparse, it makes sense to use something like a set of couples.
+   Also, since we have to build a graph on this set, we can use an adjacency list structure as above.
+
+   struct MpgElem {
+     struct Atom* atom[2]; //ptrs to the atoms from the two underlying proteins
+     struct AdjMpgElem* adj;
+   }
+
+** MPG, i.e. a graph on PVS
+
+   struct AdjMpgElem {
+     struct MpgElem* mpgElem;
+     struct AdjMpgElem* next;
+   }
+
+   struct MPG {
+     struct MpgElem* first;
+   }
+
+** Various sets of nodes to be used in Bron-Kerbosch algorithm
