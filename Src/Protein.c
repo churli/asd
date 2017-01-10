@@ -1,5 +1,15 @@
 #include "Protein.h"
 
+/* Const definition */
+const float MIN_DIST_COV_BOND = 1;
+const float MAX_DIST_COV_BOND = 2;
+const float MAX_DIST_NCOV_BOND = 3.2;
+
+const int NUM_ELEMENTS = 7;
+const char* ELEMENTS[] = {"H", "D", "N", "C", "O", "S", "Se"};
+
+/* Methods */
+
 Element parseElement(char* elemS) {
   int i = 0;
   int len = 2;
@@ -108,18 +118,28 @@ SecStructure getSecondaryStructure(Protein* protein, int resSeqNum) {
   return RCOIL;
 }
 
+Atom* Atom_newAtom() {
+  Atom* newAtom = malloc(sizeof(Atom));
+  newAtom->element = H;
+  newAtom->serial = 0;
+  newAtom->x = 0;
+  newAtom->y = 0;
+  newAtom->z = 0;
+  newAtom->adjCov = NULL;
+  newAtom->adjNCov = NULL;
+  newAtom->secStructure = RCOIL;
+  newAtom->visitedCC = FALSE;
+  return newAtom;
+}
+
 void Graph_add(Graph* graph, Element element, int serial, SecStructure secondaryStructure, int x, int y, int z) {
   //Creating the new data structures
-  Atom* newAtom = malloc(sizeof(Atom));
+  Atom* newAtom = Atom_newAtom();
   newAtom->element = element;
   newAtom->serial = serial;
   newAtom->x = x;
   newAtom->y = y;
   newAtom->z = z;
-  newAtom->adjCov = NULL;
-  newAtom->adjNCov = NULL;
-  //This has to be properly set, either here or somewhere else, using data
-  //from the SHEET/HELIX parameters.
   newAtom->secStructure = secondaryStructure;
   //
   AtomListElem* newElem = malloc(sizeof(AtomListElem));
@@ -166,19 +186,39 @@ void Graph_print(Graph graph) {
   }
 }
 
-void Graph_getSerialsOfFirstConnectedComponent(Graph graph, IntSet *serialsptr) {
+// void Graph_getSerialsOfFirstConnectedComponent(Graph graph, IntSet *serialsptr) {
+//   /* Some good old recursion... */
+//   if (graph == NULL || IntSet_isValueInSet(*serialsptr, graph->atom->serial))
+//     return;
+//   else {
+//     Atom *atomptr = graph->atom;
+//     IntSet_put(serialsptr, atomptr->serial);
+//     AtomListElem *adjAtom = atomptr->adjCov;
+//     while (adjAtom != NULL)
+//       Graph_getSerialsOfFirstConnectedComponent(adjAtom, serialsptr);
+//     adjAtom = atomptr->adjNCov;
+//     while (adjAtom != NULL)
+//       Graph_getSerialsOfFirstConnectedComponent(adjAtom, serialsptr);
+//   }
+// }
+
+void Graph_discoverFirstConnectedComponent(Graph graph) {
   /* Some good old recursion... */
-  if (graph == NULL || IntSet_isValueInSet(*serialsptr, graph->atom->serial))
+  if (graph == NULL || graph->atom->visitedCC)
     return;
   else {
     Atom *atomptr = graph->atom;
-    IntSet_put(serialsptr, atomptr->serial);
+    atomptr->visitedCC = TRUE;
     AtomListElem *adjAtom = atomptr->adjCov;
-    while (adjAtom != NULL)
-      Graph_getSerialsOfFirstConnectedComponent(adjAtom, serialsptr);
+    while (adjAtom != NULL) {
+      Graph_discoverFirstConnectedComponent(adjAtom);
+      adjAtom = adjAtom->next;
+    }
     adjAtom = atomptr->adjNCov;
-    while (adjAtom != NULL)
-      Graph_getSerialsOfFirstConnectedComponent(adjAtom, serialsptr);
+    while (adjAtom != NULL) {
+      Graph_discoverFirstConnectedComponent(adjAtom);
+      adjAtom = adjAtom->next;
+    }
   }
 }
 
@@ -235,14 +275,33 @@ int Protein_countAtoms(Protein *protein) {
   return counter;
 }
 
+// void Protein_reduceToFirstConnectedComponent(Protein *protein) {
+//   IntSet serials = IntSet_new();
+//   Graph_getSerialsOfFirstConnectedComponent(protein->graph, &serials);
+//   AtomListElem *cur = protein->graph;
+//   AtomListElem *tmp = NULL; //this is just used when removing an element
+//   while (cur != NULL && !IntSet_isValueInSet(serials, cur->atom->serial)) {
+//     protein->graph = cur->next;
+//     free(cur->atom);
+//     free(cur);
+//     cur = protein->graph;
+//   }
+//   if (cur == NULL) 
+//     return;
+//   while (cur->next != NULL && !IntSet_isValueInSet(serials, cur->next->atom->serial)) {
+//     tmp = cur->next;
+//     cur->next = cur->next->next;
+//     free(tmp->atom);
+//     free(tmp);
+//   }
+//   IntSet_free(serials);
+// }
+
 void Protein_reduceToFirstConnectedComponent(Protein *protein) {
-  IntSet* serialsptr = NULL;
-  Graph_getSerialsOfFirstConnectedComponent(protein->graph, serialsptr);
+  Graph_discoverFirstConnectedComponent(protein->graph);
   AtomListElem *cur = protein->graph;
   AtomListElem *tmp = NULL; //this is just used when removing an element
-  /*if (cur == NULL) 
-    return;*/
-  while (cur != NULL && !IntSet_isValueInSet(*serialsptr, cur->atom->serial)) {
+  while (cur != NULL && !cur->atom->visitedCC) {
     protein->graph = cur->next;
     free(cur->atom);
     free(cur);
@@ -250,56 +309,68 @@ void Protein_reduceToFirstConnectedComponent(Protein *protein) {
   }
   if (cur == NULL) 
     return;
-  while (cur->next != NULL && !IntSet_isValueInSet(*serialsptr, cur->next->atom->serial)) {
+  while (cur->next != NULL && !cur->next->atom->visitedCC) {
     tmp = cur->next;
     cur->next = cur->next->next;
     free(tmp->atom);
     free(tmp);
   }
-  IntSet_free(*serialsptr);
 }
 
-void IntSet_put(IntSet *setptr, int newval) {
-  if (setptr == NULL) {
-    printf("FATAL: Called IntSet_append on a NULL pointer!\n");
-    return;
-  }
+// IntSet IntSet_new() {
+//   IntSet is = malloc(sizeof(IntSetElem));
+//   is->value = 0;
+//   is->next = NULL;
+//   return is;
+// }
+  // IntSet IntSet_new(int cardinality) {
+  //   return calloc((sizeof(long)-1+cardinality)/sizeof(long), sizeof(long)); //rounding size up and calloc used for 0-ed mem
+  // }
 
-  IntSet newelem = malloc(sizeof(IntSetElem));
-  newelem->value = newval;
-  newelem->next = NULL;
+// void IntSet_put(IntSet *setptr, int newval) {
+//   if (setptr == NULL) {
+//     printf("FATAL: Called IntSet_append on a NULL pointer!\n");
+//     return;
+//   }
+
+//   IntSet newelem = malloc(sizeof(IntSetElem));
+//   newelem->value = newval;
+//   newelem->next = NULL;
   
-  if (*setptr == NULL) {
-    *setptr = newelem;
-  }
-  else {
-    IntSet cur = *setptr;
-    while (cur->next != NULL && cur->next->value < newval)
-      cur = cur->next;
-    if (cur->value == newval)
-      return; //don't add duplicates
-    /* insert the newelem in the set */
-    newelem->next = cur->next;
-    cur->next = newelem;
-  }
-}
+//   if (*setptr == NULL) {
+//     *setptr = newelem;
+//   }
+//   else {
+//     IntSet cur = *setptr;
+//     while (cur->next != NULL && cur->next->value < newval)
+//       cur = cur->next;
+//     if (cur->value == newval)
+//       return; //don't add duplicates
+//     /* insert the newelem in the set */
+//     newelem->next = cur->next;
+//     cur->next = newelem;
+//   }
+// }
+// void IntSet_put(IntSet *setptr, int newval) {
+//   //todo
+// }
 
-void IntSet_free(IntSet set) {
-  IntSet next = NULL;
-  while (set != NULL) {
-    next = set->next;
-    free(set);
-    set = next;
-  }
-}
+// void IntSet_free(IntSet set) {
+//   IntSet next = NULL;
+//   while (set != NULL) {
+//     next = set->next;
+//     free(set);
+//     set = next;
+//   }
+// }
 
-bool IntSet_isValueInSet(IntSet set, int val) {
-  while(set != NULL) {
-    if (set->value == val)
-      return TRUE;
-    set = set->next;
-  }
-  return FALSE;
-}
+// bool IntSet_isValueInSet(IntSet set, int val) {
+//   while(set != NULL) {
+//     if (set->value == val)
+//       return TRUE;
+//     set = set->next;
+//   }
+//   return FALSE;
+// }
 
 //eof

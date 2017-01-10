@@ -7,12 +7,12 @@
 #include <string.h>
 
 /* CONST+ENUM declarations */
-const float MIN_DIST_COV_BOND = 1;
-const float MAX_DIST_COV_BOND = 2;
-const float MAX_DIST_NCOV_BOND = 3.2;
+const float MIN_DIST_COV_BOND;
+const float MAX_DIST_COV_BOND;
+const float MAX_DIST_NCOV_BOND;
 
-const int NUM_ELEMENTS = 7;
-const char* ELEMENTS[] = {"H", "D", "N", "C", "O", "S", "Se"};
+const int NUM_ELEMENTS;
+extern const char* ELEMENTS[];
 typedef enum Element { H, D, N, C, O, S, Se } Element;
 typedef enum BondType { NONE, COV, NCOV } BondType;
 typedef enum SecStructure { RCOIL, HELIX, SHEET } SecStructure;
@@ -31,6 +31,7 @@ typedef struct Atom {
   struct AtomListElem* adjCov;
   struct AtomListElem* adjNCov;
   SecStructure secStructure;
+  bool visitedCC; //this is used when reducing the protein to its 1st connected component.
 } Atom;
 
 typedef struct AtomListElem {
@@ -57,15 +58,17 @@ typedef struct AtomListElem* Graph;
 typedef struct Protein {
   Graph graph;
   SecStructureList secStructures;
+  int atomsCount;
 } Protein;
 
 /* Serial numbers int (ordered) set */
-typedef struct IntSetElem {
+/*typedef struct IntSetElem {
   int value;
   struct IntSetElem *next;
 } IntSetElem;
 
-typedef IntSetElem* IntSet;
+typedef IntSetElem* IntSet;*/
+// typedef unsigned long * IntSet; // we try with bitfields. Basically if i-th bit is 1 it means that that serial is in set
 
 /*
 Function+methods declarations
@@ -84,7 +87,8 @@ SecStructure getSecondaryStructure(Protein* protein, int resSeqNum);
 // Graph
 void Graph_add(Graph* graph, Element element, int serial, SecStructure secondaryStructure, int x, int y, int z);
 void Graph_print(Graph graph);
-void Graph_getSerialsOfFirstConnectedComponent(Graph graph, IntSet *serialsptr);
+//void Graph_getSerialsOfFirstConnectedComponent(Graph graph, IntSet *serialsptr);
+void Graph_discoverFirstConnectedComponent(Graph graph);
 // SecStructureList methods
 SecStructureListElem* SecStructureListElem_newSecStructureListElem(SecStructure secStructure, int seqNumStart, int seqNumEnd);
 void SecStructureList_add(SecStructureList* secStructureList, SecStructure secStructure, int seqNumStart, int seqNumEnd);
@@ -94,9 +98,10 @@ void Protein_addElem(Protein* protein, Element element, int serial, int residueS
 void Protein_addSecStructure(Protein* protein, SecStructure secStructure, int seqNumStart, int seqNumEnd);
 int Protein_countAtoms(Protein *protein);
 void Protein_reduceToFirstConnectedComponent(Protein *protein); //this is used to get only the 1st connected component of a given protein
-// IntSet methods
-void IntSet_put(IntSet *setptr, int newval);
-void IntSet_free(IntSet set);
-bool IntSet_isValueInSet(IntSet set, int val);
+// // IntSet methods
+// IntSet IntSet_new(int cardinality);
+// void IntSet_put(IntSet *setptr, int newval);
+// void IntSet_free(IntSet set);
+// bool IntSet_isValueInSet(IntSet set, int val);
 
 #endif // PROTEIN_H_

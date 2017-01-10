@@ -24,14 +24,14 @@ void MPG_buildSet(MPG *mpg, Graph g1, Graph g2) {
   Atom *a1, *a2;
   while (cur1 != NULL) {
   a1 = cur1->atom;
-  printf("a1: (%s,%d)\n", ELEMENTS[a1->element], a1->secStructure); //debug
+  // printf("a1: (%s,%d)\n", ELEMENTS[a1->element], a1->secStructure); //debug
   while (cur2 != NULL) {
     a2 = cur2->atom;
-    printf("a2: (%s,%d)\n", ELEMENTS[a2->element], a2->secStructure); //debug
+    // printf("a2: (%s,%d)\n", ELEMENTS[a2->element], a2->secStructure); //debug
     //here we have to carefully choose only the possible matches
     if (MPG_areAtomsCompatible(a1,a2)) {
-      printf("(%s,%d) : (%s,%d)\n", ELEMENTS[a1->element], a1->secStructure, 
-          ELEMENTS[a2->element], a2->secStructure); //debug
+      // printf("(%s,%d) : (%s,%d)\n", ELEMENTS[a1->element], a1->secStructure, 
+      //     ELEMENTS[a2->element], a2->secStructure); //debug
       newElem = MPG_getNewElem(a1, a2);
       if (*mpg == NULL) {
         *mpg = newElem;
@@ -81,6 +81,7 @@ MPG* MPG_buildMPG(Protein* p1, Protein* p2) {
   }
   MPG* mpg = malloc(sizeof(MPG));
   *mpg = NULL;
+  
   MPG_buildSet(mpg, g1, g2);
   MPG_computeEdges(mpg);
   return mpg;

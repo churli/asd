@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "Logger.h"
 
 /* Modular product group definition */
 typedef struct AdjMpgElem {
