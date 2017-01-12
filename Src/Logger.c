@@ -2,10 +2,11 @@
 
 #include "Logger.h"
 
-void Logger_initializeStaticLogger() {
+void Logger_initializeStaticLogger(bool forceFlush_) {
   _logger.t0.tv_sec = (time_t) 0;
   _logger.t0.tv_nsec = (long) 0;
   Logger_getExecutionTime(&(_logger.t0.tv_sec), &(_logger.t0.tv_nsec));
+  _forceFlush = forceFlush_;
 }
 
 void Logger_getExecutionTime(time_t *s, long *micros) {
@@ -41,7 +42,7 @@ void LOG(const char *format, ...) {
   else {
     printf("CRITICAL: Error while logging trace, memory allocation failed.\n");
   }
-  fflush(stdout);
+  _forceFlush && fflush(stdout);
   free(s);
   free(micros);
 }

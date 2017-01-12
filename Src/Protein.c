@@ -38,8 +38,8 @@ Element parseElement(char* elemS) {
 
 void AtomList_append(AtomListElem** this, AtomListElem* new) {
   //new must be well-formed, i.e. with new.next = NULL
-  if ( this == NULL)
-    printf("You cannot pass this = NULL to AtomListAppend...thing are gonna go bad very soon...");
+  if (this == NULL)
+    printf("You cannot pass this = NULL to AtomListAppend...things are gonna go bad very soon...");
   if (*(this) != NULL) {
     AtomListElem* cur = *(this);
     while(cur->next != NULL) {

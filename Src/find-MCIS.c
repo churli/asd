@@ -13,8 +13,7 @@ int main(int argc, char** argv) {
   //This must be passed 2 args, the 2 files from PDB.
   //
 
-  // Logger *logger = Logger_newLogger();
-  Logger_initializeStaticLogger();
+  Logger_initializeStaticLogger(TRUE);
   
   LOG("Parsing protein 1...");
   Protein* p1 = parseProteinFile(argv[1]);

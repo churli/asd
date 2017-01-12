@@ -1,6 +1,6 @@
 #Makefile for find-MCIS (Maximal Common Induced Subgraph)
 
-LIBRARIES=Protein.c MPG.c ProteinParser.c Logger.c
+LIBRARIES=Common.h Protein.c MPG.c ProteinParser.c Logger.c
 
 GCC_OPTIONS=-g
 

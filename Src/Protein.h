@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "Common.h"
 
 /* CONST+ENUM declarations */
 const float MIN_DIST_COV_BOND;
@@ -16,7 +17,6 @@ extern const char* ELEMENTS[];
 typedef enum Element { H, D, N, C, O, S, Se } Element;
 typedef enum BondType { NONE, COV, NCOV } BondType;
 typedef enum SecStructure { RCOIL, HELIX, SHEET } SecStructure;
-typedef enum bool {FALSE, TRUE} bool;
 
 /*
 STRUCTURES declarations

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "Common.h"
 
 void parseHELIX(Protein* protein, char* line);
 void parseSHEET(Protein* protein, char* line);
