@@ -7,6 +7,8 @@ const float MAX_DIST_NCOV_BOND = 3.2;
 
 const int NUM_ELEMENTS = 7;
 const char* ELEMENTS[] = {"H", "D", "N", "C", "O", "S", "Se"};
+const int NUM_AMMINO_ACIDS = 20;
+const char* AMMINO_ACIDS[] = {"ALA","ARG","ASN","ASP","CYS","GLN","GLU","GLY","HIS","ILE","LEU","LYS","MET","PHE","PRO","SER","THR","TRP","TYR","VAL"};
 
 /* Methods */
 
@@ -24,7 +26,7 @@ Element parseElement(char* elemS) {
   strncpy(tmpStr,elemS,len);
   //printf("(3)tmpStr: \"%s\"\n", tmpStr);
   while (i < NUM_ELEMENTS) {
-    if (strncmp(tmpStr,ELEMENTS[i],len) == 0) {
+    if (strncmp(tmpStr, ELEMENTS[i], len) == 0) {
       free(tmpStr);
       return (Element) i;
     }
@@ -34,6 +36,18 @@ Element parseElement(char* elemS) {
   free(tmpStr);
   printf("FATAL: Unrecognized element %s\n", tmpStr);
   exit(666); //kill the process right here
+}
+
+AmminoAcid parseAmminoAcid(char* amminoS) {
+  int i = 0;
+  while (i < NUM_AMMINO_ACIDS) {
+    if (strncmp(amminoS, AMMINO_ACIDS[i], 3) == 0)
+      return (AmminoAcid) i;
+    else
+      ++i;
+  }
+  // If unrecognized, return OTHer.
+  return OTH;
 }
 
 void AtomList_append(AtomListElem** this, AtomListElem* new) {
@@ -132,11 +146,12 @@ Atom* Atom_newAtom() {
   return newAtom;
 }
 
-void Graph_add(Graph* graph, Element element, int serial, SecStructure secondaryStructure, int x, int y, int z) {
+void Graph_add(Graph* graph, Element element, int serial, AmminoAcid amminoAcid, SecStructure secondaryStructure, int x, int y, int z) {
   //Creating the new data structures
   Atom* newAtom = Atom_newAtom();
   newAtom->element = element;
   newAtom->serial = serial;
+  newAtom->amminoAcid = amminoAcid;
   newAtom->x = x;
   newAtom->y = y;
   newAtom->z = z;
@@ -254,8 +269,8 @@ Protein* Protein_newProtein() {
   return protein;
 }
 
-void Protein_addElem(Protein* protein, Element element, int serial, int residueSequenceNumber, int x, int y, int z) {
-  Graph_add(&(protein->graph), element, serial, getSecondaryStructure(protein, residueSequenceNumber), x, y, z);
+void Protein_addElem(Protein* protein, Element element, int serial, AmminoAcid amminoAcid, int residueSequenceNumber, int x, int y, int z) {
+  Graph_add(&(protein->graph), element, serial, amminoAcid, getSecondaryStructure(protein, residueSequenceNumber), x, y, z);
 }
 
 void Protein_addSecStructure(Protein* protein, SecStructure secStructure, int seqNumStart, int seqNumEnd) {
@@ -265,14 +280,20 @@ void Protein_addSecStructure(Protein* protein, SecStructure secStructure, int se
 /* Protein_countAtoms
 * is to count atoms in the protein's graph.
 */
-int Protein_countAtoms(Protein *protein) {
+int Graph_countAtoms(Graph graph)
+{
   int counter = 0;
-  Graph g = protein->graph;
-  while (g != NULL) {
+  while (graph != NULL) {
     ++counter;
-    g = g->next;
+    graph = graph->next;
   }
   return counter;
+}
+
+int Protein_countAtoms(Protein *protein)
+{
+  return Graph_countAtoms(protein->graph);
+  
 }
 
 // void Protein_reduceToFirstConnectedComponent(Protein *protein) {
