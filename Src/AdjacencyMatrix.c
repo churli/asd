@@ -4,10 +4,12 @@
 void AM_initialize(long numGraphElements)
 {
   _numGraphElements = numGraphElements;
-  _adjacencyVector = malloc( ((numGraphElements/8) + 1) * sizeof(char));
+  unsigned long adjVectorItems = (numGraphElements * (numGraphElements - 1)) / 2;
+  unsigned long vectorLength = ((adjVectorItems/8) + 1);
+  _adjacencyVector = malloc( vectorLength * sizeof(char));
   if (_adjacencyVector == NULL)
   {
-    LOG("Couldn't allocate the adjacency vector...");
+    LOG("Couldn't allocate the adjacency vector: %lu bytes", vectorLength);
     exit(666);
   }
 }

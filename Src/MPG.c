@@ -105,10 +105,12 @@ void MPG_computeEdges(MPG *mpg)
       {
         AM_setAdjacent(otherElem->serial, curElem->serial); // PAS OP: this works because otherSerial < curSerial, always.
         ++(mpg->edges);
+        if ( mpg->edges % 1000000 == 0 ) // Each 100k ledges, log a line.
+          LOG("MPG PARTIAL: %dM edges.", (mpg->edges)/1000000);
       }
     }
   }
-  LOG("MPG has %d edges.", mpg->edges);
+  LOG("MPG COMPLETED: %d edges.", mpg->edges);
 }
 
 bool MPG_isThereEdgeBetween(MpgElem *a, MpgElem *b)
@@ -116,46 +118,6 @@ bool MPG_isThereEdgeBetween(MpgElem *a, MpgElem *b)
   return (Atom_getBondType(a->atom[0], b->atom[0]) 
           == Atom_getBondType(a->atom[1], b->atom[1]));
 }
-
-// void MPG_addElementAndComputeEdges(MPG *mpg, MpgElem *newElem) {
-//   // Add
-//   if (*mpg == NULL) {
-//     *mpg = newElem;
-//     return;
-//   }
-//   //else go on
-//   MpgElem* curElem = *mpg;
-//   while (curElem->next != NULL) {
-//     //compute edges here
-//     if (Atom_getBondType(newElem->atom[0], curElem->atom[0]) 
-//         == Atom_getBondType(newElem->atom[1], curElem->atom[1]))
-//     {
-//       //if eligible for edge in MPG, add the edges to both objects
-//       // MpgElem_addAdjElem(curElem, newElem);
-//       // MpgElem_addAdjElem(newElem, curElem);
-//       //todo Replace this with matrix version.
-//       ++_mpgEdgesCounter;
-//     }
-      
-//     //
-//     //++elemCounter; //debug
-//     curElem = curElem->next;
-//   }
-//   //last element currently in MPG
-//   if (Atom_getBondType(newElem->atom[0], curElem->atom[0]) 
-//         == Atom_getBondType(newElem->atom[1], curElem->atom[1]))
-//   {
-//     //if eligible for edge in MPG, add the edges to both objects
-//     // MpgElem_addAdjElem(curElem, newElem);
-//     // MpgElem_addAdjElem(newElem, curElem);
-//     //todo Replace this with matrix version.
-//     ++_mpgEdgesCounter;
-//   }
-//   //++elemCounter; //debug
-//   //finally append newElem to MPG
-//   curElem->next = newElem;
-//   //LOG("Added %d-th element to MPG", elemCounter);
-// }
 
 MPG* MPG_buildMPG(Protein* p1, Protein* p2) {
   if (p1 == NULL || p2 == NULL) {
@@ -180,12 +142,9 @@ MPG* MPG_buildMPG(Protein* p1, Protein* p2) {
   _mpgEdgesCounter = 0; //initializing the static
   LOG("Starting MPG_buildSet...");
   MPG_buildSet(mpg, g1, g2);
+
   LOG("Allocating AdjacencyMatrix...");
   AM_initialize(mpg->elements);
-  // Debug, testing the array
-  LOG("DEBUG: testing the adjacency array...");
-  for (long i = 0; i < mpg->elements; ++i)
-    _adjacencyVector[i] = 't';
 
   LOG("Starting MPG_computeEdges...");
   MPG_computeEdges(mpg);
