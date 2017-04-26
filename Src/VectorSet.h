@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "Common.h"
 #include "Logger.h"
+#include "AdjacencyMatrix.h"
 
 static long _vSetLength;
 static long _vSetByteLength;
@@ -14,11 +15,19 @@ short VSet_bitIndex(long serial);
 
 void VSet_setLength(long length);
 
+long VSet_getLength();
+
+long VSet_getByteLength();
+
 char * VSet_new();
 
 bool VSet_isEmpty(char * vset);
 
+long VSet_getSize(char * vset);
+
 void VSet_add(char * vset, long newSerial);
+
+int VSet_get(char * vset, long serial);
 
 void VSet_remove(char * vset, long serial);
 

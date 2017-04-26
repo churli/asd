@@ -6,6 +6,7 @@
 #include "Protein.h"
 #include "MPG.h"
 #include "BronKerbosch.h"
+#include "VBronKerbosch.h"
 #include "ProteinParser.h"
 #include "Logger.h"
 
@@ -39,12 +40,23 @@ int main(int argc, char** argv) {
   LOG("Building MPG...");
   MPG * mpg = MPG_buildMPG(p1, p2);
 
+  long numMpgElements = mpg->elements;
+
   MPG_clear(mpg);
   Protein_clear(p1);
   Protein_clear(p2);
 
   //Now we have to find the max clique
-  startBronKerbosch();
+  if (argc >= 4 && strcmp(argv[3], "array") == 0)
+  {
+    LOG("Starting Bron-Kerbosch with array-sets");
+    startVBronKerbosch();
+  }
+  else
+  {
+    LOG("Starting Bron-Kerbosch with sets");
+    startBronKerbosch();
+  }
 }
 
 //eof
