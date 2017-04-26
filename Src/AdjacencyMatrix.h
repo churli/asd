@@ -6,10 +6,13 @@
 #include "Logger.h"
 
 static char * _adjacencyVector;
+static long * _degreeVector;
 static long _numGraphElements;
 
 // Mem allocation (initialization)
 void AM_initialize(long numGraphElements);
+
+long AM_getNumGraphElements();
 
 // Indexing
 long AM_getIndex(long i, long j);
@@ -25,5 +28,13 @@ void AM_setBit(char* byte, short i);
 // High level operations, set * get
 bool AM_getIfAdjacent(long i, long j);
 void AM_setAdjacent(long i, long j);
+
+void DV_initialize(long numGraphElements);
+
+void DV_setDegree(long serial, long degree);
+
+void DV_increaseDegree(long serial);
+
+long DV_getDegree(long serial);
 
 #endif // ADJACENCY_MATRIX_H_

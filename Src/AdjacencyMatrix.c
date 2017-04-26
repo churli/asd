@@ -6,7 +6,7 @@ void AM_initialize(long numGraphElements)
   _numGraphElements = numGraphElements;
   unsigned long adjVectorItems = (numGraphElements * (numGraphElements - 1)) / 2;
   unsigned long vectorLength = ((adjVectorItems/8) + 1);
-  _adjacencyVector = malloc( vectorLength * sizeof(char));
+  _adjacencyVector = calloc(vectorLength, sizeof(char));
   if (_adjacencyVector == NULL)
   {
     LOG("Couldn't allocate the adjacency vector: %lu bytes", vectorLength);
@@ -14,15 +14,18 @@ void AM_initialize(long numGraphElements)
   }
 }
 
-// Indexing
+long AM_getNumGraphElements()
+{
+  return _numGraphElements;
+}
+
+// Indexing (0-based)
 long AM_getIndex(long i, long j)
 {
   long index = 0;
   long k = _numGraphElements;
 
-  //for (long l = 0; i - 1; ++l)
-  //  index += k - l - 1;
-  index += i*(k-1) - ((i-1)*(i-2)/2);
+  index += i*(k) - ((i+1)*(i)/2); // The second term here is sum of all integers < (i)
 
   index += j - i - 1;
   return index;
@@ -48,7 +51,7 @@ bool AM_getBit(char byte, short i)
 void AM_setBit(char* bytePtr, short i)
 {
   // Set the i-th bit of *bytePtr to 1.
-  *bytePtr = *bytePtr | (1 << i);
+  *bytePtr |= (1 << i);
 }
 
 // High level operations, set * get
@@ -69,6 +72,32 @@ void AM_setAdjacent(long i, long j)
   short sbIndex = AM_getSubBitIndex(index);
 
   AM_setBit(_adjacencyVector + cIndex, sbIndex);
+}
+
+void DV_initialize(long numGraphElements)
+{
+  // Allocating mem
+  _degreeVector = calloc(numGraphElements, sizeof(long));
+  if (_degreeVector == NULL)
+  {
+    LOG("Couldn't allocate the degree vector: %lu bytes", numGraphElements * sizeof(long));
+    exit(666);
+  }
+}
+
+void DV_setDegree(long serial, long degree)
+{
+  *(_degreeVector + serial) = degree;
+}
+
+void DV_increaseDegree(long serial)
+{
+  ++(*(_degreeVector + serial));
+}
+
+long DV_getDegree(long serial)
+{
+  return *(_degreeVector + serial);
 }
 
 // eof

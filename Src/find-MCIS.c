@@ -5,6 +5,7 @@
 
 #include "Protein.h"
 #include "MPG.h"
+#include "BronKerbosch.h"
 #include "ProteinParser.h"
 #include "Logger.h"
 
@@ -36,10 +37,14 @@ int main(int argc, char** argv) {
   
   //Graph_print(p1->graph);
   LOG("Building MPG...");
-  MPG* mpg = MPG_buildMPG(p1, p2);
+  MPG * mpg = MPG_buildMPG(p1, p2);
+
+  MPG_clear(mpg);
+  Protein_clear(p1);
+  Protein_clear(p2);
 
   //Now we have to find the max clique
-
+  startBronKerbosch();
 }
 
 //eof

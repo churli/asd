@@ -33,8 +33,8 @@ Element parseElement(char* elemS) {
     else
       ++i;
   }
-  free(tmpStr);
   printf("FATAL: Unrecognized element %s\n", tmpStr);
+  free(tmpStr);
   exit(666); //kill the process right here
 }
 
@@ -81,6 +81,28 @@ void Atom_addAdjElem(Atom* this, Atom* new, BondType bondType) {
 
 float Atom_distance(Atom* a, Atom* b) {
   return sqrt(pow(a->x - b->x, 2) + pow(a->y - b->y, 2) + pow(a->z - b->z, 2)) / 1000;
+}
+
+void Atom_clear(Atom * atom)
+{
+  AtomListElem * cur = atom->adjCov;
+  AtomListElem * next;
+  while (cur != NULL)
+  {
+    next = cur->next;
+    free(cur);
+    cur = next;
+  }
+  atom->adjCov = NULL;
+  cur = atom->adjNCov;
+  while (cur != NULL)
+  {
+    next = cur->next;
+    free(cur);
+    cur = next;
+  }
+  atom->adjNCov = NULL;
+  free(atom);
 }
 
 BondType Atom_calcBond(Atom* a, Atom* b) {
@@ -201,6 +223,20 @@ void Graph_print(Graph graph) {
   }
 }
 
+void Graph_clear(Graph * graph)
+{
+  AtomListElem * cur = *graph;
+  AtomListElem * next;
+  while (cur != NULL)
+  {
+    next = cur->next;
+    Atom_clear(cur->atom);
+    free(cur);
+    cur = next;
+  }
+  *graph = NULL;
+}
+
 // void Graph_getSerialsOfFirstConnectedComponent(Graph graph, IntSet *serialsptr) {
 //   /* Some good old recursion... */
 //   if (graph == NULL || IntSet_isValueInSet(*serialsptr, graph->atom->serial))
@@ -262,6 +298,18 @@ void SecStructureList_add(SecStructureList* secStructureList, SecStructure secSt
   }
 }
 
+void SecStructureListElem_clear(SecStructureListElem * secStructureListElem)
+{
+  SecStructureListElem * cur = secStructureListElem;
+  SecStructureListElem * next;
+  while (cur != NULL)
+  {
+    next = cur->next;
+    free(cur);
+    cur = next;
+  }
+}
+
 Protein* Protein_newProtein() {
   Protein* protein = malloc(sizeof(Protein));
   protein->graph = NULL;
@@ -275,6 +323,13 @@ void Protein_addElem(Protein* protein, Element element, int serial, AmminoAcid a
 
 void Protein_addSecStructure(Protein* protein, SecStructure secStructure, int seqNumStart, int seqNumEnd) {
   SecStructureList_add(&(protein->secStructures), secStructure, seqNumStart, seqNumEnd);
+}
+
+void Protein_clear(Protein * protein)
+{
+  Graph_clear(&(protein->graph));
+  SecStructureListElem_clear(protein->secStructures);
+  free(protein);
 }
 
 /* Protein_countAtoms

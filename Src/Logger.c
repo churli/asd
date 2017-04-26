@@ -36,7 +36,7 @@ void LOG(const char *format, ...) {
   va_end(args);
 
   if (text) {
-    printf("%5d.%06ld | %s\n", (intmax_t)*s, *micros, text); //trying %5d instead of %"PRIdMAX"
+    printf("%5ld.%06ld | %s\n", (intmax_t)*s, *micros, text); //trying %5d instead of %"PRIdMAX"
     free(text);
   }
   else {

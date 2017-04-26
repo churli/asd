@@ -25,7 +25,7 @@ STRUCTURES declarations
 */
 typedef struct Atom {
   Element element; //facciamo un enum di fatto (potremmo anche usare un bit-field per ridurre lo spazio)
-  int serial; //serve per identificarli, alla fine puo' fare comodo
+  int serial; //serve per identificarli, alla fine puo' fare comodo.
   int residualSeqNum; //questo serve per matchare le secondary structures
   int x; //position in x axis (int because we represent in mA° (milli Angstrom))
   int y;
@@ -82,6 +82,7 @@ AmminoAcid parseAmminoAcid(char* amminoS);
 // Methods to add elements to structs
 void AtomList_append(AtomListElem** this, AtomListElem* new);
 void Atom_addAdjElem(Atom* this, Atom* new, BondType bondType);
+void Atom_clear(Atom * atom);
 // Calculate or check things
 float Atom_distance(Atom* a, Atom* b);
 BondType Atom_calcBond(Atom* a, Atom* b);
@@ -91,16 +92,19 @@ SecStructure getSecondaryStructure(Protein* protein, int resSeqNum);
 // Graph
 void Graph_add(Graph* graph, Element element, int serial, AmminoAcid amminoAcid, SecStructure secondaryStructure, int x, int y, int z);
 void Graph_print(Graph graph);
+void Graph_clear(Graph * graph);
 //void Graph_getSerialsOfFirstConnectedComponent(Graph graph, IntSet *serialsptr);
 void Graph_discoverFirstConnectedComponent(Graph graph);
 int Graph_countAtoms(Graph graph);
 // SecStructureList methods
 SecStructureListElem* SecStructureListElem_newSecStructureListElem(SecStructure secStructure, int seqNumStart, int seqNumEnd);
 void SecStructureList_add(SecStructureList* secStructureList, SecStructure secStructure, int seqNumStart, int seqNumEnd);
+void SecStructureListElem_clear(SecStructureListElem * secStructureListElem);
 // Protein methods
 Protein* Protein_newProtein();
 void Protein_addElem(Protein* protein, Element element, int serial, AmminoAcid amminoAcid, int residueSequenceNumber, int x, int y, int z);
 void Protein_addSecStructure(Protein* protein, SecStructure secStructure, int seqNumStart, int seqNumEnd);
+void Protein_clear(Protein * protein);
 int Protein_countAtoms(Protein *protein);
 void Protein_reduceToFirstConnectedComponent(Protein *protein); //this is used to get only the 1st connected component of a given protein
 // // IntSet methods

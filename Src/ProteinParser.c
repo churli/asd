@@ -55,8 +55,10 @@ Protein* parseProteinFile(char* fname) {
   char* line = NULL;
   size_t len = 0;
   ssize_t read;
+
+  bool stop = FALSE;
   
-  while ( (read = getline(&line, &len, f)) != -1 ) {
+  while ( !stop && (read = getline(&line, &len, f)) != -1 ) {
     if (strncmp(line, "ATOM", 4) == 0) {
       //printf(line);
       parseATOM(protein, line);
@@ -68,6 +70,9 @@ Protein* parseProteinFile(char* fname) {
     else if (strncmp(line, "HELIX", 5) == 0) {
       //printf(line);
       parseHELIX(protein, line);
+    }
+    else if (strncmp(line, "TER", 3) == 0) {
+      stop = TRUE;
     }
   }
 
