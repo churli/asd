@@ -168,11 +168,12 @@ Atom* Atom_newAtom() {
   return newAtom;
 }
 
-void Graph_add(Graph* graph, Element element, int serial, AmminoAcid amminoAcid, SecStructure secondaryStructure, int x, int y, int z) {
+void Graph_add(Graph* graph, Element element, int serial, int resSeqNum, AmminoAcid amminoAcid, SecStructure secondaryStructure, int x, int y, int z) {
   //Creating the new data structures
   Atom* newAtom = Atom_newAtom();
   newAtom->element = element;
   newAtom->serial = serial;
+  newAtom->residualSeqNum = resSeqNum;
   newAtom->amminoAcid = amminoAcid;
   newAtom->x = x;
   newAtom->y = y;
@@ -259,6 +260,7 @@ void Graph_discoverFirstConnectedComponent(Graph graph) {
     return;
   else {
     Atom *atomptr = graph->atom;
+    // LOG("New atom in connected component: %d[%d]", atomptr->serial, atomptr->residualSeqNum); //debug
     atomptr->visitedCC = TRUE;
     AtomListElem *adjAtom = atomptr->adjCov;
     while (adjAtom != NULL) {
@@ -318,7 +320,7 @@ Protein* Protein_newProtein() {
 }
 
 void Protein_addElem(Protein* protein, Element element, int serial, AmminoAcid amminoAcid, int residueSequenceNumber, int x, int y, int z) {
-  Graph_add(&(protein->graph), element, serial, amminoAcid, getSecondaryStructure(protein, residueSequenceNumber), x, y, z);
+  Graph_add(&(protein->graph), element, serial, residueSequenceNumber, amminoAcid, getSecondaryStructure(protein, residueSequenceNumber), x, y, z);
 }
 
 void Protein_addSecStructure(Protein* protein, SecStructure secStructure, int seqNumStart, int seqNumEnd) {
@@ -385,11 +387,18 @@ void Protein_reduceToFirstConnectedComponent(Protein *protein) {
   }
   if (cur == NULL) 
     return;
-  while (cur->next != NULL && !cur->next->atom->visitedCC) {
-    tmp = cur->next;
-    cur->next = cur->next->next;
-    free(tmp->atom);
-    free(tmp);
+  while (cur->next != NULL) {
+    if (!cur->next->atom->visitedCC)
+    {
+      tmp = cur->next;
+      cur->next = cur->next->next;
+      free(tmp->atom);
+      free(tmp);
+    }
+    else
+    {
+      cur = cur->next;
+    }
   }
 }
 

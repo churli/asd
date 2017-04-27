@@ -19,6 +19,7 @@ typedef struct Set
 {
   long size;
   SetElement * first;
+  SetElement * last;
 } Set;
 
 SetElement * SetElement_new(long serial, long degree);
@@ -28,6 +29,8 @@ Set * Set_new();
 bool Set_isEmpty(Set * set);
 
 void Set_add(Set * set, SetElement * newElement);
+
+void Set_append(Set * set, SetElement * newElement);
 
 void Set_remove(Set * set, long serial);
 

@@ -14,6 +14,7 @@ Set * Set_new()
   Set * new = malloc(sizeof(Set));
   new->size = 0;
   new->first = NULL;
+  new->last = NULL;
   return new;
 }
 
@@ -29,6 +30,7 @@ void Set_add(Set * set, SetElement * newElement)
   {
     // Empty set?
     set->first = newElement;
+    set->last = newElement;
   }
   else if (set->first->degree == newElement->degree
            && set->first->serial > newElement->serial) // Degrees are equal, first serial > new serial
@@ -59,6 +61,12 @@ void Set_add(Set * set, SetElement * newElement)
     // And insert the new element between cur and next.
     newElement->next = cur->next;
     cur->next = newElement;
+
+    // If new element is the last one, update last pointer
+    if (newElement->next == NULL)
+    {
+      set->last = newElement;
+    }
   }
 
   ++(set->size);
@@ -67,6 +75,7 @@ void Set_add(Set * set, SetElement * newElement)
 void Set_remove(Set * set, long serial)
 {
   // Remove element by serial from set.
+
   if (set->first == NULL)
   {
     // Empty set?
@@ -77,6 +86,10 @@ void Set_remove(Set * set, long serial)
     SetElement * target = set->first;
     set->first = target->next;
     free(target);
+    if (set->first == NULL)
+    {
+      set->last = NULL;
+    }
   }
   else
   {
@@ -98,6 +111,12 @@ void Set_remove(Set * set, long serial)
       cur->next = target->next;
       free(target);
     }
+    
+    // If currently reached element is the last one, update last pointer
+    if (cur->next == NULL)
+    {
+      set->last = cur;
+    }
   }
 
   --(set->size);
@@ -114,6 +133,8 @@ void Set_clear(Set * set)
     free(todel);
   }
   set->size = 0; //just for consistency
+  set->first = NULL;
+  set->last = NULL;
   // Eventually also free the Set object
   free(set);
 }
@@ -130,6 +151,22 @@ void Set_print(Set * set, char * setName)
   printf("\n");
 }
 
+void Set_append(Set * set, SetElement * newElement)
+{
+  // NOTE: this is UNSAFE: it requires elements to be added following the proper order.
+  if (set->last == NULL) // Set is empty
+  {
+    set->first = newElement;
+    set->last = newElement;
+  }
+  else
+  {
+    set->last->next = newElement;
+    set->last = newElement;
+  }
+  ++(set->size);
+}
+
 Set * Set_union(Set * a, Set * b)
 {
   if (a == NULL || b == NULL)
@@ -143,32 +180,32 @@ Set * Set_union(Set * a, Set * b)
     if (cura == NULL)
     {
       toadd = SetElement_new(curb->serial, curb->degree); // copy values into new element
-      Set_add(c, toadd);
+      Set_append(c, toadd);
       curb = curb->next;
     }
     else if (curb == NULL)
     {
       toadd = SetElement_new(cura->serial, cura->degree);
-      Set_add(c, toadd);
+      Set_append(c, toadd);
       cura = cura->next;
     }
     else if (cura->degree > curb->degree)
     {
       toadd = SetElement_new(cura->serial, cura->degree);
-      Set_add(c, toadd);
+      Set_append(c, toadd);
       cura = cura->next;
     }
     else if (cura->degree == curb->degree
              && cura->serial < curb->serial)
     {
       toadd = SetElement_new(cura->serial, cura->degree);
-      Set_add(c, toadd);
+      Set_append(c, toadd);
       cura = cura->next;
     }
     else
     {
       toadd = SetElement_new(curb->serial, curb->degree);
-      Set_add(c, toadd);
+      Set_append(c, toadd);
       curb = curb->next; 
     }
   }
@@ -201,7 +238,7 @@ Set * Set_intersection(Set * a, Set * b)
       {
         //LOG("SET INTERSECTION: good, adding to intersection"); //debug
         toadd = SetElement_new(cura->serial, cura->degree);
-        Set_add(c, toadd);
+        Set_append(c, toadd);
         cura = cura->next;
         curb = curb->next;
       }
@@ -232,7 +269,7 @@ Set * Set_difference(Set * a, Set * b)
     if (curb == NULL || cura->degree > curb->degree)
     {
       toadd = SetElement_new(cura->serial, cura->degree);
-      Set_add(c, toadd);
+      Set_append(c, toadd);
       ++(c->size);
       cura = cura->next;
     }
@@ -241,7 +278,7 @@ Set * Set_difference(Set * a, Set * b)
       if (cura->serial < curb->serial)
       {
         toadd = SetElement_new(cura->serial, cura->degree);
-        Set_add(c, toadd);
+        Set_append(c, toadd);
         cura = cura->next;
       }
       else if (cura->serial == curb->serial)
@@ -342,6 +379,7 @@ void bronKerbosch(Set * R, Set * P, Set * X)
   if (Set_isEmpty(P) && Set_isEmpty(X))
   {
     onNewClique(R->size);
+    // Set_print(R, "R"); // debug
     return;
   }
   else

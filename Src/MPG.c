@@ -141,9 +141,15 @@ void MPG_computeEdges(MPG *mpg)
       if (MPG_isThereEdgeBetween(curElem, otherElem))
       {
         // DEBUG print
-        // LOG("MPG EDGE: %ld(%s,%s) <--> %ld(%s,%s)", 
-        //         otherElem->serial, ELEMENTS[otherElem->atom[0]->element], ELEMENTS[otherElem->atom[1]->element],
-        //         curElem->serial, ELEMENTS[curElem->atom[0]->element], ELEMENTS[curElem->atom[1]->element]); //debug
+        // LOG("MPG EDGE: %ld(%s[%d],%s[%d]) <-(%d=%d)-> %ld(%s[%d],%s[%d])", 
+        //         otherElem->serial, 
+        //         ELEMENTS[otherElem->atom[0]->element], otherElem->atom[0]->serial, 
+        //         ELEMENTS[otherElem->atom[1]->element], otherElem->atom[1]->serial,
+        //         Atom_calcBond(otherElem->atom[0], curElem->atom[0]),
+        //         Atom_calcBond(otherElem->atom[1], curElem->atom[1]),
+        //         curElem->serial, 
+        //         ELEMENTS[curElem->atom[0]->element], curElem->atom[0]->serial,
+        //         ELEMENTS[curElem->atom[1]->element], curElem->atom[1]->serial); //debug
         
         AM_setAdjacent(otherElem->serial, curElem->serial); // PAS OP: this works because otherSerial < curSerial, always.
         DV_increaseDegree(curElem->serial);
@@ -161,8 +167,17 @@ bool MPG_isThereEdgeBetween(MpgElem *a, MpgElem *b)
 {
   // return (Atom_getBondType(a->atom[0], b->atom[0]) 
   //         == Atom_getBondType(a->atom[1], b->atom[1]));
-  return (Atom_calcBond(a->atom[0], b->atom[0]) 
+  bool areAtomsDifferent = (a->atom[0] != b->atom[0]) && (a->atom[1] != b->atom[1]);
+  if (areAtomsDifferent)
+  {
+    bool isBondEqual = (Atom_calcBond(a->atom[0], b->atom[0]) 
           == Atom_calcBond(a->atom[1], b->atom[1]));
+    return isBondEqual;
+  }
+  else
+  {
+    return FALSE;
+  }
 }
 
 MPG* MPG_buildMPG(Protein* p1, Protein* p2) {

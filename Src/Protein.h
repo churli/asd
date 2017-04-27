@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string.h>
 #include "Common.h"
+#include "Logger.h"
 
 /* CONST+ENUM declarations */
 const float MIN_DIST_COV_BOND;
@@ -90,7 +91,7 @@ void Atom_checkBond(Atom* a, Atom* b);
 BondType Atom_getBondType(Atom *a, Atom *b); //Check if any 2 given atoms are adjacents to each-other
 SecStructure getSecondaryStructure(Protein* protein, int resSeqNum);
 // Graph
-void Graph_add(Graph* graph, Element element, int serial, AmminoAcid amminoAcid, SecStructure secondaryStructure, int x, int y, int z);
+void Graph_add(Graph* graph, Element element, int serial, int resSeqNum, AmminoAcid amminoAcid, SecStructure secondaryStructure, int x, int y, int z);
 void Graph_print(Graph graph);
 void Graph_clear(Graph * graph);
 //void Graph_getSerialsOfFirstConnectedComponent(Graph graph, IntSet *serialsptr);
