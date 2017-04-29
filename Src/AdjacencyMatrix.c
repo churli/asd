@@ -88,16 +88,28 @@ void DV_initialize(long numGraphElements)
 void DV_setDegree(long serial, long degree)
 {
   *(_degreeVector + serial) = degree;
+  if (degree > _maxDegree)
+  {
+    _maxDegree = degree;
+  }
 }
 
 void DV_increaseDegree(long serial)
 {
-  ++(*(_degreeVector + serial));
+  if (++(*(_degreeVector + serial)) > _maxDegree)
+  {
+    _maxDegree = *(_degreeVector + serial);
+  }
 }
 
 long DV_getDegree(long serial)
 {
   return *(_degreeVector + serial);
+}
+
+long DV_getMaxDegree()
+{
+  return _maxDegree;
 }
 
 // eof

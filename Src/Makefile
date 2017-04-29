@@ -1,6 +1,6 @@
 #Makefile for find-MCIS (Maximal Common Induced Subgraph)
 
-LIBRARIES=Common.h Protein.c MPG.c ProteinParser.c Logger.c AdjacencyMatrix.c BronKerbosch.c VBronKerbosch.c VectorSet.c
+LIBRARIES=Common.h Protein.c MPG.c ProteinParser.c Logger.c AdjacencyMatrix.c BronKerbosch.c Sets.c VBronKerbosch.c VectorSet.c
 
 #GCC_OPTIONS=-g -Wall -Wpedantic
 GCC_OPTIONS=-g

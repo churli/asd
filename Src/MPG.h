@@ -7,7 +7,8 @@
 #include <string.h>
 #include "Common.h"
 #include "Protein.h"
-#include "BronKerbosch.h"
+#include "AdjacencyMatrix.h"
+#include "Sets.h"
 #include "Logger.h"
 
 /* Modular product group definition */

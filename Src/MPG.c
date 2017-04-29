@@ -1,5 +1,4 @@
 #include "MPG.h"
-#include "AdjacencyMatrix.h"
 
 // Methods
 // void AdjMpgElemList_append(AdjMpgElemList this, AdjMpgElem *new) {

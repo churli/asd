@@ -8,6 +8,7 @@
 static char * _adjacencyVector;
 static long * _degreeVector;
 static long _numGraphElements;
+static long _maxDegree;
 
 // Mem allocation (initialization)
 void AM_initialize(long numGraphElements);
@@ -36,5 +37,7 @@ void DV_setDegree(long serial, long degree);
 void DV_increaseDegree(long serial);
 
 long DV_getDegree(long serial);
+
+long DV_getMaxDegree();
 
 #endif // ADJACENCY_MATRIX_H_
