@@ -107,7 +107,7 @@ void startBronKerbosch()
   long maxDegree = DV_getMaxDegree();
   LOG("MaxDegree(MPG) = %ld", maxDegree);
 
-  long * degreesDistribution = calloc(maxDegree, sizeof(long));
+  long * degreesDistribution = calloc(maxDegree+1, sizeof(long));
   for (long serial = 0; serial < numElements; ++serial)
   {
     long deg = DV_getDegree(serial);
