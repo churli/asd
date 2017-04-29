@@ -40,7 +40,7 @@ bool MPG_areAtomsCompatible(Atom* a, Atom* b) {
   return (
       a->element == b->element
       && a->secStructure == b->secStructure
-      && a->amminoAcid == b->amminoAcid // Ammino-check! :)
+      && (_avoidAmminoCheck || a->amminoAcid == b->amminoAcid) // Ammino-check! :)
       );
   //return TRUE; //to revert to filtering
 }
@@ -179,7 +179,8 @@ bool MPG_isThereEdgeBetween(MpgElem *a, MpgElem *b)
   }
 }
 
-MPG* MPG_buildMPG(Protein* p1, Protein* p2) {
+MPG* MPG_buildMPG(Protein* p1, Protein* p2, bool filterByAmminoCheck) {
+  _avoidAmminoCheck = !filterByAmminoCheck;
   if (p1 == NULL || p2 == NULL) {
     printf("FATAL: Proteins cannot be NULL!");
     exit(666);

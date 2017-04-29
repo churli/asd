@@ -31,7 +31,13 @@ Set * computeNeighbours(long serial)
 
 Set * getNeighbours(long serial)
 {
-  return _neighboursSetArray[serial];
+  Set * res = _neighboursSetArray[serial];
+  if (res == NULL)
+  {
+    res = computeNeighbours(serial);
+    _neighboursSetArray[serial] = res;
+  }
+  return res;
 }
 
 void onNewClique(long newCliqueSize)
@@ -55,6 +61,11 @@ void bronKerbosch(Set * R, Set * P, Set * X)
   {
     onNewClique(R->size);
     // Set_print(R, "R"); // debug
+    return;
+  }
+  else if (P->size + R->size < _maxCliqueSize)
+  {
+    // From this branch of recursion tree we cannot get any bigger clique
     return;
   }
   else
@@ -124,12 +135,11 @@ void startBronKerbosch()
   LOG("MaxPossibleCliqueSize(MPG) = %ld", mpcs);
 
   allocateNeighboursSetArray();
-  LOG("Start precomputing neighbours");
+  LOG("P set init");
   for (long serial = 0; serial < numElements; ++serial)
   {
     Set_add(P, SetElement_new(serial, DV_getDegree(serial)));
-    Set * neighbours = computeNeighbours(serial);
-    _neighboursSetArray[serial] = neighbours;
+    _neighboursSetArray[serial] = NULL;
   }
 
   LOG("Start Bron-Kerbosch clique finding");

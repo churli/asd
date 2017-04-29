@@ -17,6 +17,21 @@ int main(int argc, char** argv) {
 
   Logger_initializeStaticLogger(TRUE);
   
+  bool useArrayBK = FALSE;
+  bool filterByAmminoCheck = FALSE;
+  for (int i = 3; i < argc; ++i)
+  {
+    if (strcmp(argv[i], "array") == 0)
+    {
+      useArrayBK = TRUE;
+    }
+    else if (strcmp(argv[i], "amminoCheck") == 0)
+    {
+      LOG("Including amminoCheck while filtering isomorphisms");
+      filterByAmminoCheck = TRUE;
+    }
+  }
+
   LOG("Parsing protein 1...");
   Protein* p1 = parseProteinFile(argv[1]);
   LOG("Parsing protein 2...");
@@ -38,7 +53,7 @@ int main(int argc, char** argv) {
   
   //Graph_print(p1->graph);
   LOG("Building MPG...");
-  MPG * mpg = MPG_buildMPG(p1, p2);
+  MPG * mpg = MPG_buildMPG(p1, p2, filterByAmminoCheck);
 
   long numMpgElements = mpg->elements;
 
@@ -47,16 +62,16 @@ int main(int argc, char** argv) {
   Protein_clear(p2);
 
   //Now we have to find the max clique
-  if (argc >= 4 && strcmp(argv[3], "array") == 0)
-  {
-    LOG("Starting Bron-Kerbosch with array-sets");
-    startVBronKerbosch();
-  }
-  else
-  {
-    LOG("Starting Bron-Kerbosch with sets");
-    startBronKerbosch();
-  }
+  if (useArrayBK)
+    {
+      LOG("Starting Bron-Kerbosch with array-sets");
+      startVBronKerbosch();
+    }
+    else
+    {
+      LOG("Starting Bron-Kerbosch with sets");
+      startBronKerbosch();
+    }
 }
 
 //eof

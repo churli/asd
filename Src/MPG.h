@@ -36,6 +36,7 @@ typedef struct MPG {
 
 // Statics
 //static unsigned long _mpgEdgesCounter; //debug //apparently long isn't long enough at all...we easily get overflows here...
+static bool _avoidAmminoCheck;
 
 /* Functions declarations */
 // void AdjMpgElemList_append(AdjMpgElemList this, AdjMpgElem *new);
@@ -48,6 +49,6 @@ void MPG_buildSet(MPG *mpg, Graph g1, Graph g2);
 void MPG_addElement(MPG *mpg, MpgElem *newElem);
 void MPG_computeEdges(MPG *mpg);
 bool MPG_isThereEdgeBetween(MpgElem *a, MpgElem *b);
-MPG* MPG_buildMPG(Protein* p1, Protein* p2);
+MPG* MPG_buildMPG(Protein* p1, Protein* p2, bool filterByAmminoCheck);
 
 #endif // MPG_H_
