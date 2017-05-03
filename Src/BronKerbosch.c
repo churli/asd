@@ -1,9 +1,34 @@
 #include "BronKerbosch.h"
 
+void setMaxCliqueSize(long size)
+{
+  _maxCliqueSize = size;
+}
+
+long getMaxCliqueSize()
+{
+  return _maxCliqueSize;
+}
+
 void allocateNeighboursSetArray()
 {
   long numElements = AM_getNumGraphElements();
   _neighboursSetArray = calloc(numElements, sizeof(Set*));
+}
+
+Set * getNeighboursSetArray(long serial)
+{
+  return _neighboursSetArray[serial];
+}
+
+void setNeighboursSetArray(long serial, Set * set)
+{
+  _neighboursSetArray[serial] = set;
+}
+
+void freeNeighboursSetArray()
+{
+  free(_neighboursSetArray);
 }
 
 Set * computeNeighbours(long serial)
@@ -31,12 +56,19 @@ Set * computeNeighbours(long serial)
 
 Set * getNeighbours(long serial)
 {
-  Set * res = _neighboursSetArray[serial];
+  Set * res = getNeighboursSetArray(serial);
   if (res == NULL)
   {
     res = computeNeighbours(serial);
-    _neighboursSetArray[serial] = res;
+    setNeighboursSetArray(serial, res);
   }
+
+  // // DEBUG
+  // if (serial == 2)
+  // {
+  //   Set_print(res, "NEIGHBORHOOD(2)");
+  // }
+
   return res;
 }
 
@@ -57,10 +89,11 @@ void bronKerbosch(Set * R, Set * P, Set * X)
   //Set_print(R, "R"); //debug
   //Set_print(P, "P"); //debug
 
-  if (Set_isEmpty(P) && Set_isEmpty(X))
+  if (Set_isEmpty(P)
+      && Set_isEmpty(X))
   {
     onNewClique(R->size);
-    // Set_print(R, "R"); // debug
+    // Set_print(R, "CLIQUE"); // debug
     return;
   }
   else if (P->size + R->size < _maxCliqueSize)
@@ -88,26 +121,38 @@ void bronKerbosch(Set * R, Set * P, Set * X)
       Set * newP = Set_intersection(P, vNeighbours);
       Set * newX = Set_intersection(X, vNeighbours);
 
-      Set_clear(vSingleton);
-      //Set_clear(vNeighbours);
+      Set_free(vSingleton);
+      //Set_free(vNeighbours);
 
       bronKerbosch(newR, newP, newX);
       
-      Set_clear(newR);
-      Set_clear(newP);
-      Set_clear(newX);
+      Set_free(newR);
+      Set_free(newP);
+      Set_free(newX);
 
       Set_remove(P, vOrig->serial);
+      
+      // Test: remove v from being neighbour of all its neighbours
+      // SetElement * curNeigh = vNeighbours->first;
+      // while (curNeigh != NULL)
+      // {
+      //   Set * target = getNeighbours(curNeigh->serial);
+      //   Set_remove(target, vOrig->serial);
+      //   curNeigh = curNeigh->next;
+      // }
+      // Set_clear(vNeighbours);
+      //
+
       Set_add(X, SetElement_new(vOrig->serial, vOrig->degree));
     }
-    //Set_clear(uNeighbours);
-    Set_clear(C);
+    //Set_free(uNeighbours);
+    Set_free(C);
   }
 }
 
 void startBronKerbosch()
 {
-  _maxCliqueSize = 0;
+  setMaxCliqueSize(0);
   Set * R = Set_new();
   Set * P = Set_new();
   Set * X = Set_new();
@@ -139,19 +184,19 @@ void startBronKerbosch()
   for (long serial = 0; serial < numElements; ++serial)
   {
     Set_add(P, SetElement_new(serial, DV_getDegree(serial)));
-    _neighboursSetArray[serial] = NULL;
+    setNeighboursSetArray(serial, NULL);
   }
 
   LOG("Start Bron-Kerbosch clique finding");
 
   bronKerbosch(R, P, X);
-  LOG("FINAL MAX CLIQUE: size %ld", _maxCliqueSize);
+  LOG("FINAL MAX CLIQUE: size %ld", getMaxCliqueSize());
   LOG("Cleaning up...");
   for (long serial = 0; serial < numElements; ++serial)
   {
-    free(_neighboursSetArray[serial]);
+    free(getNeighboursSetArray(serial));
   }
-  free(_neighboursSetArray);
+  freeNeighboursSetArray();
 }
 
 // eof

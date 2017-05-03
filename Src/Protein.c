@@ -5,6 +5,10 @@ const float MIN_DIST_COV_BOND = 1;
 const float MAX_DIST_COV_BOND = 2;
 const float MAX_DIST_NCOV_BOND = 3.2;
 
+const float SQUARE_MIN_DIST_COV_BOND = 1000000;
+const float SQUARE_MAX_DIST_COV_BOND = 4000000;
+const float SQUARE_MAX_DIST_NCOV_BOND = 10240000;
+
 const int NUM_ELEMENTS = 7;
 const char* ELEMENTS[] = {"H", "D", "N", "C", "O", "S", "Se"};
 const int NUM_AMMINO_ACIDS = 20;
@@ -83,6 +87,10 @@ float Atom_distance(Atom* a, Atom* b) {
   return sqrt(pow(a->x - b->x, 2) + pow(a->y - b->y, 2) + pow(a->z - b->z, 2)) / 1000;
 }
 
+float Atom_squareDistance(Atom* a, Atom* b) {
+  return pow(a->x - b->x, 2) + pow(a->y - b->y, 2) + pow(a->z - b->z, 2);
+}
+
 void Atom_clear(Atom * atom)
 {
   AtomListElem * cur = atom->adjCov;
@@ -107,7 +115,7 @@ void Atom_clear(Atom * atom)
 
 BondType Atom_calcBond(Atom* a, Atom* b) {
   float dist = Atom_distance(a,b);
-  if (dist < MIN_DIST_COV_BOND)
+  if (dist > MAX_DIST_NCOV_BOND || dist < MIN_DIST_COV_BOND) // should be faster to have the most common case first
     return NONE;
   else if (dist <= MAX_DIST_COV_BOND)
     return COV;
@@ -117,8 +125,20 @@ BondType Atom_calcBond(Atom* a, Atom* b) {
     return NONE;
 }
 
+BondType Atom_calcBondSquare(Atom* a, Atom* b) {
+  float dist = Atom_squareDistance(a,b);
+  if (dist > SQUARE_MAX_DIST_NCOV_BOND || dist < SQUARE_MIN_DIST_COV_BOND) // should be faster to have the most common case first
+    return NONE;
+  else if (dist <= SQUARE_MAX_DIST_COV_BOND)
+    return COV;
+  else if (dist <= SQUARE_MAX_DIST_NCOV_BOND)
+    return NCOV;
+  else
+    return NONE;
+}
+
 void Atom_checkBond(Atom* a, Atom* b) {
-  BondType bondType = Atom_calcBond(a,b);
+  BondType bondType = Atom_calcBondSquare(a,b);
   if (bondType != NONE) {
     Atom_addAdjElem(a,b,bondType);
     Atom_addAdjElem(b,a,bondType);

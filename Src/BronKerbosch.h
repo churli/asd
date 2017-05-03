@@ -10,7 +10,17 @@
 static long _maxCliqueSize;
 static Set ** _neighboursSetArray;
 
+void setMaxCliqueSize(long size);
+
+long getMaxCliqueSize();
+
 void allocateNeighboursSetArray();
+
+Set * getNeighboursSetArray(long serial);
+
+void setNeighboursSetArray(long serial, Set * set);
+
+void freeNeighboursSetArray();
 
 Set * computeNeighbours(long serial);
 

@@ -13,6 +13,8 @@ static long _maxDegree;
 // Mem allocation (initialization)
 void AM_initialize(long numGraphElements);
 
+void AM_free();
+
 long AM_getNumGraphElements();
 
 // Indexing
@@ -31,6 +33,8 @@ bool AM_getIfAdjacent(long i, long j);
 void AM_setAdjacent(long i, long j);
 
 void DV_initialize(long numGraphElements);
+
+void DV_free();
 
 void DV_setDegree(long serial, long degree);
 

@@ -6,6 +6,7 @@
 #include "Protein.h"
 #include "MPG.h"
 #include "BronKerbosch.h"
+#include "Tomita.h"
 #include "VBronKerbosch.h"
 #include "ProteinParser.h"
 #include "Logger.h"
@@ -18,6 +19,7 @@ int main(int argc, char** argv) {
   Logger_initializeStaticLogger(TRUE);
   
   bool useArrayBK = FALSE;
+  bool useTomita = FALSE;
   bool filterByAmminoCheck = FALSE;
   for (int i = 3; i < argc; ++i)
   {
@@ -29,6 +31,11 @@ int main(int argc, char** argv) {
     {
       LOG("Including amminoCheck while filtering isomorphisms");
       filterByAmminoCheck = TRUE;
+    }
+    else if (strcmp(argv[i], "tomita") == 0)
+    {
+      LOG("Using Tomita algorithm for maximum clique finding");
+      useTomita = TRUE;
     }
   }
 
@@ -62,16 +69,21 @@ int main(int argc, char** argv) {
   Protein_clear(p2);
 
   //Now we have to find the max clique
-  if (useArrayBK)
-    {
-      LOG("Starting Bron-Kerbosch with array-sets");
-      startVBronKerbosch();
-    }
-    else
-    {
-      LOG("Starting Bron-Kerbosch with sets");
-      startBronKerbosch();
-    }
+  if (useTomita)
+  {
+    LOG("Starting Tomita");
+    startTomita();
+  }
+  else if (useArrayBK)
+  {
+    LOG("Starting Bron-Kerbosch with array-sets");
+    startVBronKerbosch();
+  }
+  else
+  {
+    LOG("Starting Bron-Kerbosch with sets");
+    startBronKerbosch();
+  }
 }
 
 //eof

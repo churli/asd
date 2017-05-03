@@ -14,6 +14,11 @@ void AM_initialize(long numGraphElements)
   }
 }
 
+void AM_free()
+{
+  free(_adjacencyVector);
+}
+
 long AM_getNumGraphElements()
 {
   return _numGraphElements;
@@ -83,6 +88,11 @@ void DV_initialize(long numGraphElements)
     LOG("Couldn't allocate the degree vector: %lu bytes", numGraphElements * sizeof(long));
     exit(666);
   }
+}
+
+void DV_free()
+{
+  free(_degreeVector);
 }
 
 void DV_setDegree(long serial, long degree)

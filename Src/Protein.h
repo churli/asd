@@ -86,7 +86,9 @@ void Atom_addAdjElem(Atom* this, Atom* new, BondType bondType);
 void Atom_clear(Atom * atom);
 // Calculate or check things
 float Atom_distance(Atom* a, Atom* b);
+float Atom_squareDistance(Atom* a, Atom* b);
 BondType Atom_calcBond(Atom* a, Atom* b);
+BondType Atom_calcBondSquare(Atom* a, Atom* b);
 void Atom_checkBond(Atom* a, Atom* b);
 BondType Atom_getBondType(Atom *a, Atom *b); //Check if any 2 given atoms are adjacents to each-other
 SecStructure getSecondaryStructure(Protein* protein, int resSeqNum);

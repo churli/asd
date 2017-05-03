@@ -63,7 +63,7 @@ void MPG_clear(MPG * mpg)
     // }
     cur->atom[0] = NULL; // Useless but clean
     cur->atom[1] = NULL; // Useless but clean
-    Set_clear(cur->adjacentSet);
+    Set_free(cur->adjacentSet);
     free(cur);
     cur = next;
   }
