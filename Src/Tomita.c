@@ -5,25 +5,13 @@ void Tomita_expand(Set * R, Set * Q, Set * Qmax, long * No)
   while (R->size > 0)
   {
     SetElement * p = R->last;
-    // LOG("p = %ld, No[p->serial] = %ld, Q->size = %ld, Qmax->size = %ld", p->serial, No[p->serial], Q->size, Qmax->size); //debug
-    // Set_print(R, "R"); //debug
-    // Set_print(Q, "Q"); //debug
+
     if (Q->size + No[p->serial] > Qmax->size)
     {
       SetElement * p1 = SetElement_new(p->serial, p->degree);
-      //ColorSet_add(No, Q, p1);
       Set_append(Q, p1); // Ordering doesn't matter in Q
 
-      // Set * pNeighbours = getNeighbours(p->serial);
-      // LOG("(PRE) pNeighbours->size = %ld", pNeighbours->size); //debug
-      // Set_print(pNeighbours, "pNeighbours"); //debug
-      // Tomita_sortByColor(pNeighbours, No);
-      // LOG("(POST) pNeighbours->size = %ld", pNeighbours->size); //debug
-      // Set_print(pNeighbours, "pNeighbours"); //debug
-      // Set * Rp = ColorSet_intersection(No, R, pNeighbours);
       Set * Rp = ColorSet_intersectWithNeighboursOf(No, R, p->serial);
-      // LOG("Rp->size = %ld", Rp->size); //debug
-      // Set_print(Rp, "Rp"); //debug
       
       if (Rp->size > 0)
       {
@@ -39,13 +27,11 @@ void Tomita_expand(Set * R, Set * Q, Set * Qmax, long * No)
       else if (Q->size > Qmax->size)
       {
         onNewClique(Q->size);
-        // Set_print(Q, "Q"); //debug
         Set * Qcopy = Set_copy(Q);
         Set_clear(Qmax);
         *Qmax = *Qcopy;
         free(Qcopy);
       }
-      //Set_remove(Q, p->serial);
       Set_removeLast(Q);
       Set_free(Rp);
     }
@@ -53,7 +39,6 @@ void Tomita_expand(Set * R, Set * Q, Set * Qmax, long * No)
     {
       return;
     }
-    //Set_remove(R, p->serial);
     Set_removeLast(R);
   }
 }
@@ -70,9 +55,6 @@ void Tomita_numberSort(Set * R, long * No)
   {
     SetElement * p = R->first;
     k = 1;
-    // Set * pNeighbours = getNeighbours(p->serial);
-    // Tomita_sortByColor(pNeighbours, No);
-    // while (ColorSet_getFirstInIntersection(No, C[k], pNeighbours) != NULL)
     while (ColorSet_getFirstInIntersectionWithNeighboursOf(No, C[k], p->serial) != NULL)
     {
       ++k;
@@ -129,13 +111,11 @@ void startTomita()
   LOG("MaxPossibleCliqueSize(MPG) = %ld", mpcs);
   free(degreesDistribution);
 
-  // allocateNeighboursSetArray();
   // Init R to the entire MPG vertex set
   LOG("R set initial sorting");
   for (long serial = 0; serial < numElements; ++serial)
   {
     Set_add(R, SetElement_new(serial, DV_getDegree(serial)));
-    // setNeighboursSetArray(serial, NULL);
   }
 
   LOG("Initial Tomita numbering");
@@ -149,13 +129,7 @@ void startTomita()
     cur = cur->next;
   }
   long termColor = DV_getMaxDegree() + 1;
-  // // Here we should re-sort the tail by ascending serial
-  // Set * reSortedTail = Set_reSortBySerial(cur);
-  // prev->next = reSortedTail->first;
-  // R->last = reSortedTail->last;
-  // free(reSortedTail);
-  // cur = prev->next;
-  //
+  
   while (cur != NULL)
   {
     No[cur->serial] = termColor;
@@ -172,11 +146,6 @@ void startTomita()
   Set_free(Q);
   Set_free(Qmax);
   free(No);
-  // for (long serial = 0; serial < numElements; ++serial)
-  // {
-  //   free(getNeighboursSetArray(serial));
-  // }
-  // freeNeighboursSetArray();
   AM_free();
   DV_free();
 }
